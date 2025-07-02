@@ -66,6 +66,29 @@ def get_greeting():
 def get_random_response(responses):
     return random.choice(responses)
 
+def get_all_prices():
+    all_items = products.find()
+    price_lines = []
+    for item in all_items:
+        name = item.get("name", "Product").title()
+        prices = [f"{q['size']} - ₹{q['price']}" for q in item.get("quantities", [])]
+        price_lines.append(f"💰 <b>{name}</b>: {', '.join(prices)}")
+    return "<br><br>".join(price_lines)
+
+def get_all_benefits():
+    all_items = products.find()
+    benefit_lines = []
+    for item in all_items:
+        name = item.get("name", "Product").lower()
+        benefits = product_benefits.get(name, [
+            "100% natural and chemical-free",
+            "Made with traditional methods",
+            "Rich in nutrients and health benefits",
+            "Premium quality product"
+        ])
+        benefit_lines.append(f"🌟 <b>{name.title()}</b>:<br>- " + "<br>- ".join(benefits))
+    return "<br><br>".join(benefit_lines)
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -73,6 +96,23 @@ def index():
 @app.route("/chatbot", methods=["POST"])
 def chatbot():
     user_input = request.json.get("message", "").lower().strip()
+
+    # Handle "isvaryam" or "about isvaryam" queries
+    if "isvaryam" in user_input and ("about" in user_input or "what" in user_input or "who" in user_input or "tell me" in user_input):
+        about_responses = [
+            "We are Isvaryam, offering premium natural products including: Groundnut Oil, Coconut Oil, Sesame Oil, Ghee, Jaggery Powder, and our Super Pack (1L each of 3 oils).",
+            "Isvaryam specializes in high-quality natural products. Our range includes: Groundnut Oil, Coconut Oil, Sesame Oil, Ghee, Jaggery Powder, and a Super Pack combo.",
+            "At Isvaryam, we sell these authentic products: Groundnut Oil, Coconut Oil, Sesame Oil, Ghee, Jaggery Powder, and our popular Super Pack."
+        ]
+        return jsonify(response=get_random_response(about_responses))
+
+    # Handle simple price query
+    if user_input in ["price", "prices", "price details", "cost", "rate"]:
+        return jsonify(response=f"Here are all our product prices:<br><br>{get_all_prices()}")
+
+    # Handle simple benefits query
+    if user_input in ["benefits", "benefit", "product benefits", "health benefits", "advantages"]:
+        return jsonify(response=f"Here are the benefits of all our products:<br><br>{get_all_benefits()}")
 
     # Expanded greeting responses
     greetings = ["hi", "hello", "good morning", "good evening", "good afternoon", 
@@ -274,13 +314,7 @@ def chatbot():
 
     # Handle price list queries
     if any(word in user_input for word in all_price_keywords):
-        all_items = products.find()
-        price_lines = []
-        for item in all_items:
-            name = item.get("name", "Product").title()
-            prices = [f"{q['size']} - ₹{q['price']}" for q in item.get("quantities", [])]
-            price_lines.append(f"💰 <b>{name}</b>: {', '.join(prices)}")
-        return jsonify(response="<br><br>".join(price_lines))
+        return jsonify(response=f"Here are all our product prices:<br><br>{get_all_prices()}")
 
     # Handle payment method queries
     if any(word in user_input for word in payment_keywords):
@@ -313,8 +347,8 @@ def chatbot():
     if any(word in user_input for word in discount_keywords):
         discount_response = [
             "🎁 Special offers available during festivals - call us to check current deals!",
-            "💸 We occasionally run promotions - contact us at {contact_data['phone']} for current discounts",
-            "🛍️ Check with our team at {contact_data['phone']} for any ongoing offers or combo deals"
+            f"💸 We occasionally run promotions - contact us at {contact_data['phone']} for current discounts",
+            f"🛍️ Check with our team at {contact_data['phone']} for any ongoing offers or combo deals"
         ]
         return jsonify(response=get_random_response(discount_response))
 
@@ -338,11 +372,13 @@ def chatbot():
             found_product = "jaggery powder"
 
         if found_product:
-            benefits = product_benefits.get(found_product, [])
-            if benefits:
-                return jsonify(response=f"🌟 Benefits of {found_product.title()}:<br>- " + "<br>- ".join(benefits))
-            else:
-                return jsonify(response=f"ℹ️ {found_product.title()} is a natural product with many health benefits.")
+            benefits = product_benefits.get(found_product, [
+                "100% natural and chemical-free",
+                "Made with traditional methods",
+                "Rich in nutrients and health benefits",
+                "Premium quality product"
+            ])
+            return jsonify(response=f"🌟 Benefits of {found_product.title()}:<br>- " + "<br>- ".join(benefits))
 
     # Reviews intent
     if any(word in user_input for word in ["reviews", "product reviews", "show reviews", "customer feedback", "testimonials"]):
@@ -442,9 +478,13 @@ def chatbot():
                 response_parts.append(f"📸 Images of {db_name.title()}:<br>{img_html}")
 
         if any(word in user_input for word in benefit_keywords):
-            benefits = product_benefits.get(db_name, [])
-            if benefits:
-                response_parts.append(f"🌟 Benefits: {', '.join(benefits)}")
+            benefits = product_benefits.get(db_name, [
+                "100% natural and chemical-free",
+                "Made with traditional methods",
+                "Rich in nutrients and health benefits",
+                "Premium quality product"
+            ])
+            response_parts.append(f"🌟 Benefits of {db_name.title()}:<br>- " + "<br>- ".join(benefits))
 
         if not response_parts:
             desc = item.get("description", "This is a premium product made with care.")
