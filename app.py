@@ -7,25 +7,25 @@ import os
 
 app = Flask(__name__, static_url_path='/static', static_folder='static', template_folder='templates')
 
-# Secure MongoDB connection
+# MongoDB connection
 mongo_uri = os.environ.get("MONGO_URI")
 client = MongoClient(mongo_uri)
 db = client["isvaryam"]
 products = db["products"]
 
-# Load local JSON files
+# Local data
 with open("ingredients.json") as f:
     ingredients_data = json.load(f)
 with open("contact.json") as f:
     contact_data = json.load(f)
 
-# Aliases and recommendations
+# Aliases
 alias_map = {
-    "combo pack": "super pack",
-    "oil combo": "super pack",
-    "3 oil combo": "super pack"
+    "combo pack": "super pack", "oil combo": "super pack", "3 oil combo": "super pack",
+    "combo": "super pack", "sugar": "jaggery powder"
 }
 
+# Product recommendations
 recommendations = {
     "groundnut oil": ["coconut oil", "sesame oil", "super pack"],
     "coconut oil": ["sesame oil", "groundnut oil", "super pack"],
@@ -41,8 +41,7 @@ def get_greeting():
         return "Good morning ☀️"
     elif hour < 17:
         return "Good afternoon 🌤️"
-    else:
-        return "Good evening 🌙"
+    return "Good evening 🌙"
 
 @app.route("/")
 def index():
@@ -52,28 +51,57 @@ def index():
 def chatbot():
     user_input = request.json.get("message", "").lower()
 
-    # 1. Greeting
-    if any(greet in user_input for greet in ["hi", "hello", "good morning", "good afternoon", "good evening", "hey"]):
-        return jsonify(response=f"{get_greeting()}! I'm here to help you explore Isvaryam’s natural products. What would you like to know?")
+    greetings = ["hi", "hello", "good morning", "good evening", "good afternoon", "hey", "yo", "hola", "what's up"]
+    silly_queries = [
+        "are you real", "can i marry you", "what's your name", "do you love me", "you single", "can you cook",
+        "sing a song", "tell a joke", "you look nice", "you cute", "what is 0/0", "do you sleep", "are you ai",
+        "how are you", "how do you know this", "what are you"
+    ]
+    location_keywords = [
+        "location", "where is isvaryam", "where is your store", "store address", "address", "location of company"
+    ]
+    delivery_keywords = [
+        "delivery", "shipping", "how many days", "when will it reach", "delivery time", "how fast"
+    ]
+    image_keywords = [
+        "all images", "show all images", "product images", "pictures of products", "show products visually", "display items"
+    ]
+    type_keywords = [
+        "types of oil", "oil types", "types of products", "products offered", "what do you sell", "offered by isvaryam", "range of oils"
+    ]
+    order_keywords = [
+        "how to order", "place an order", "order now", "buy", "want to buy", "book", "purchase", "make a purchase"
+    ]
+    track_keywords = [
+        "track", "tracking", "track my order", "where is my order", "order status", "check order", "tracking details", "how do i track"
+    ]
+    product_list_keywords = [
+        "products", "what do you have", "show all", "available items", "list items", "what can i buy", "items available"
+    ]
+    all_price_keywords = [
+        "product price", "all prices", "prices of products", "cost of all", "price list"
+    ]
 
-    # 2. Contact / Location info
-    if any(word in user_input for word in ["contact", "phone", "email", "address", "reach you", "location", "where is isvaryam", "where is your store", "location of company", "store location"]):
+    if any(greet in user_input for greet in greetings):
+        return jsonify(response=f"{get_greeting()}! I'm Isvaryam’s assistant. How can I help you today?")
+
+    if any(word in user_input for word in silly_queries):
+        return jsonify(response="😄 I'm just a helpful chatbot. Let's talk about oils and orders!")
+
+    if any(word in user_input for word in location_keywords + ["contact", "phone", "email", "reach you"]):
         return jsonify(response=(
             f"📞 Phone: {contact_data['phone']}<br>"
             f"✉️ Email: {contact_data['email']}<br>"
             f"📍 Address: {contact_data['address']}"
         ))
 
-    # 3. Delivery info
-    if any(word in user_input for word in ["delivery", "shipping", "how many days", "when will it reach"]):
+    if any(word in user_input for word in delivery_keywords):
         return jsonify(response="🚚 We deliver to Coimbatore in 2 days and to other cities in 3–4 days.")
 
-    # 4. Product listing
-    if any(word in user_input for word in ["products", "what do you have", "show all", "available items", "list items"]):
-        return jsonify(response="📦 We currently offer: Groundnut Oil, Coconut Oil, Sesame Oil, Ghee, Jaggery Powder, and a Super Pack (1L each of 3 oils).")
+    if any(word in user_input for word in product_list_keywords):
+        return jsonify(response="📦 We offer: Groundnut Oil, Coconut Oil, Sesame Oil, Ghee, Jaggery Powder, and a Super Pack (1L each of 3 oils).")
 
-    # 5. Show all images
-    if any(word in user_input for word in ["all images", "show all images", "images of all", "pictures of products", "product pics", "display all images", "show me images"]):
+    if any(word in user_input for word in image_keywords):
         all_items = products.find()
         img_block = ""
         for item in all_items:
@@ -81,29 +109,28 @@ def chatbot():
             images = item.get("images", [])[:1]
             for img in images:
                 img_block += f"<b>{name.title()}</b><br><img src='{img}' width='100' style='margin:5px;'><br><br>"
-        return jsonify(response=f"🖼️ Here are some of our products:<br><br>{img_block}")
+        return jsonify(response=f"🖼️ Our product gallery:<br><br>{img_block}")
 
-    # 6. Types of products (e.g. types of oils)
-    if any(word in user_input for word in [
-        "types of oil", "types of products", "products you offer", "items available", "offered by isvaryam", "varieties of oil", "range of oils"
-    ]):
+    if any(word in user_input for word in type_keywords):
         oils = [name.title() for name in ingredients_data.keys()]
-        return jsonify(response=f"🛍️ Isvaryam offers the following natural products:<br>{', '.join(oils)}")
+        return jsonify(response=f"🛍️ We offer the following: {', '.join(oils)}")
 
-    # 7. Ordering queries
-    if any(word in user_input for word in [
-        "how to order", "place order", "i want to order", "order now", "book now", "make a purchase", "buy", "want to buy"
-    ]):
-        return jsonify(response=f"🛒 To place an order, please call us at 📞 {contact_data['phone']}")
+    if any(word in user_input for word in order_keywords):
+        return jsonify(response=f"🛒 To place an order, call us at 📞 {contact_data['phone']}")
 
-    # 8. Order tracking queries
-    if any(word in user_input for word in [
-        "track", "tracking", "track my order", "order track", "where is my order", "check my order", "order update",
-        "order status", "track order", "how do i track", "tracking isvaryam", "how can i check my order"
-    ]):
-        return jsonify(response=f"📦 To track your order, please call us at 📞 {contact_data['phone']}")
+    if any(word in user_input for word in track_keywords):
+        return jsonify(response=f"📦 For tracking, please call 📞 {contact_data['phone']}")
 
-    # 9. Match specific product from user query
+    if any(word in user_input for word in all_price_keywords):
+        all_items = products.find()
+        price_lines = []
+        for item in all_items:
+            name = item.get("name", "Product").title()
+            prices = [f"{q['size']} - ₹{q['price']}" for q in item.get("quantities", [])]
+            price_lines.append(f"💰 <b>{name}</b>: {', '.join(prices)}")
+        return jsonify(response="<br><br>".join(price_lines))
+
+    # Specific product fuzzy match
     all_product_names = list(ingredients_data.keys()) + list(alias_map.keys())
     words = user_input.split()
     matched = get_close_matches(" ".join(words), all_product_names, n=1, cutoff=0.6)
@@ -123,40 +150,34 @@ def chatbot():
 
         response_parts = []
 
-        # Price queries
         if any(word in user_input for word in ["price", "cost", "rate", "how much"]):
             prices = [f"{q['size']} - ₹{q['price']}" for q in item.get("quantities", [])]
-            response_parts.append(f"🛒 Prices for {db_name.title()}: {', '.join(prices)}")
+            response_parts.append(f"🛒 {db_name.title()} Prices: {', '.join(prices)}")
 
-        # Ingredient queries
-        if any(word in user_input for word in ["ingredient", "what is in", "contains", "made of"]):
+        if any(word in user_input for word in ["ingredient", "contains", "what is in", "made of"]):
             if db_name in ingredients_data:
                 ingredients = ", ".join(ingredients_data[db_name])
-                response_parts.append(f"🧾 {db_name.title()} contains: {ingredients}")
+                response_parts.append(f"🧾 Ingredients of {db_name.title()}: {ingredients}")
             else:
-                response_parts.append(f"ℹ️ {db_name.title()} includes a blend of our finest oils.")
+                response_parts.append(f"ℹ️ {db_name.title()} is a natural product.")
 
-        # Image queries
         if any(word in user_input for word in ["image", "photo", "pic", "picture", "show me"]):
             imgs = item.get("images", [])[:3]
             if imgs:
                 img_html = " ".join([f"<img src='{img}' width='100' style='margin:5px;'/>" for img in imgs])
-                response_parts.append(f"📸 Here are some images of {db_name.title()}:<br>{img_html}")
+                response_parts.append(f"📸 Images of {db_name.title()}:<br>{img_html}")
 
-        # Default description
         if not response_parts:
-            description = item.get("description", "This is a premium product made with care.")
-            response_parts.append(f"📝 {db_name.title()}: {description}")
+            desc = item.get("description", "This is a premium product made with care.")
+            response_parts.append(f"📝 {db_name.title()}: {desc}")
 
-        # Recommendations
         related = recommendations.get(db_name, [])
         if related:
             response_parts.append(f"🤝 Customers also buy: {', '.join([r.title() for r in related])}")
 
         return jsonify(response="<br><br>".join(response_parts))
 
-    # Fallback
-    return jsonify(response="❓ Sorry, I couldn't understand your request. You can ask me about product prices, ingredients, images, how to order, or delivery details.")
+    return jsonify(response="🤖 I didn’t get that. Try asking about products, prices, oils, ordering, or delivery info.")
 
 if __name__ == "__main__":
     app.run(debug=True)
