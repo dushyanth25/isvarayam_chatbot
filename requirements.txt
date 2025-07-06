@@ -2,3 +2,5 @@ Flask
 gunicorn
 pymongo
 dnspython
+spacy
+nltk
