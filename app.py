@@ -586,7 +586,7 @@ def chatbot():
             return jsonify(response="<br><br>".join(response_parts))
 
         # Handle all reviews request
-        if any(word in user_input for word in ["reviews", "product reviews", "show reviews", "customer feedback", "testimonials"]):
+        if any(word in user_input for word in ["reviews", "review", "product reviews", "show reviews", "customer feedback", "testimonials"]):
             review_list = reviews.find()
             product_reviews = {}
             for rev in review_list:
