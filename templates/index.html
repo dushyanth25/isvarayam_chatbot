@@ -5,40 +5,99 @@
   <title>Isvaryam Chatbot 🪔</title>
   <link rel="stylesheet" href="/static/style.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
   <div class="chat-container">
     <header>
-      <h1>Isvaryam Chatbot 🪔</h1>
+      <div class="header-content">
+        <img src="https://isvaryam.com/cdn/shop/files/Isvaryam_Logo_200x.png" alt="Isvaryam Logo" class="logo">
+        <h1>Isvaryam Product Assistant</h1>
+      </div>
     </header>
 
-    <div id="chatbox" class="chatbox"></div>
+    <div id="chatbox" class="chatbox">
+      <div class="welcome-message">
+        <p>🪔 Welcome to Isvaryam! I'm here to help with:</p>
+        <ul>
+          <li>Product information</li>
+          <li>Pricing details</li>
+          <li>Health benefits</li>
+          <li>Order assistance</li>
+        </ul>
+        <p>Try asking: <i>"What's in your super pack?"</i> or <i>"Show me coconut oil prices"</i></p>
+      </div>
+    </div>
 
     <div class="input-container">
-      <input type="text" id="userInput" placeholder="Type your message..." autocomplete="off" />
+      <input type="text" id="userInput" placeholder="Ask about our oils, ghee, or jaggery..." autocomplete="off" />
+      <button id="sendButton"><i class="fas fa-paper-plane"></i></button>
     </div>
   </div>
 
   <script>
     const input = document.getElementById("userInput");
     const chatbox = document.getElementById("chatbox");
+    const sendButton = document.getElementById("sendButton");
 
-    input.addEventListener("keypress", async function (e) {
-      if (e.key === "Enter" && input.value.trim() !== "") {
-        const msg = input.value;
-        chatbox.innerHTML += `<div class="message user"><b>You:</b> ${msg}</div>`;
+    // Function to add message to chat
+    function addMessage(sender, message) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${sender}`;
+      
+      if (sender === 'user') {
+        messageDiv.innerHTML = `<b>You:</b> ${message}`;
+      } else {
+        // Process bot responses to handle links properly
+        messageDiv.innerHTML = `<b>Isvaryam:</b> ${message}`;
+      }
+      
+      chatbox.appendChild(messageDiv);
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+
+    // Function to handle sending messages
+    async function sendMessage() {
+      const msg = input.value.trim();
+      if (msg !== "") {
+        addMessage('user', msg);
         input.value = "";
 
-        const res = await fetch("/chatbot", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: msg })
-        });
+        try {
+          const res = await fetch("/chatbot", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: msg })
+          });
 
-        const data = await res.json();
-        chatbox.innerHTML += `<div class="message bot"><b>Bot:</b> ${data.response}</div>`;
-        chatbox.scrollTop = chatbox.scrollHeight;
+          const data = await res.json();
+          addMessage('bot', data.response);
+          
+          // Make links open in new tab after they're added to DOM
+          setTimeout(() => {
+            const links = chatbox.querySelectorAll('.message.bot a');
+            links.forEach(link => {
+              link.setAttribute('target', '_blank');
+              link.setAttribute('rel', 'noopener noreferrer');
+            });
+          }, 100);
+          
+        } catch (error) {
+          addMessage('bot', "⚠️ Sorry, I'm having trouble connecting. Please try again later.");
+        }
       }
+    }
+
+    // Event listeners
+    input.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") sendMessage();
+    });
+    
+    sendButton.addEventListener("click", sendMessage);
+
+    // Focus input on load
+    window.addEventListener('load', () => {
+      input.focus();
     });
   </script>
 </body>
