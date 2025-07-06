@@ -84,7 +84,7 @@ OFFENSIVE_KEYWORDS = {
 
 UNRELATED_KEYWORDS = {
     "movie", "sports", "music", "politics", "religion", "football", "cricket","lusu","mairu"
-    "weather", "news", "bitcoin", "crypto", "stock", "elon", "musk", "ai",
+    "weather", "news", "bitcoin", "crypto", "stock", "elon", "musk", "ai", "gugan", "sannathayoli", "sannanai",
     "chatgpt", "google", "facebook", "tiktok", "instagram", "whatsapp","pranaesh","sannam","deepak"
 }
 
