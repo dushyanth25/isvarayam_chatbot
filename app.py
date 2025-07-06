@@ -49,7 +49,36 @@ product_data = {
         "usage": ["Cooking", "Frying", "Salad dressing", "Skin moisturizer"],
         "storage": "Store in cool, dry place away from sunlight"
     },
-    # Similar structures for other products...
+    "coconut oil": {
+        "description": "Pure cold-pressed coconut oil with natural aroma and nutrients",
+        "benefits": ["Boosts immunity", "Good for hair", "Skin moisturizer", "Contains MCTs"],
+        "usage": ["Cooking", "Hair care", "Skin care", "Oil pulling"],
+        "storage": "Store below 30°C, may solidify in cold temperatures"
+    },
+    "sesame oil": {
+        "description": "Traditional cold-pressed sesame oil with rich flavor",
+        "benefits": ["Rich in antioxidants", "Good for heart", "Anti-inflammatory", "High in zinc"],
+        "usage": ["Tadka", "Massage oil", "Skin care", "Ayurvedic preparations"],
+        "storage": "Store in airtight container away from light"
+    },
+    "ghee": {
+        "description": "Pure cow's ghee made using traditional bilona method",
+        "benefits": ["Boosts digestion", "Good for brain", "High smoke point", "Rich in CLA"],
+        "usage": ["Cooking", "Ayurvedic medicine", "Drizzling on food", "Deep frying"],
+        "storage": "Store in airtight container at room temperature"
+    },
+    "jaggery powder": {
+        "description": "Unrefined natural sweetener made from sugarcane juice",
+        "benefits": ["Rich in iron", "Better than sugar", "Boosts immunity", "Good for digestion"],
+        "usage": ["Sweetening drinks", "Desserts", "Traditional sweets", "Healthy alternative to sugar"],
+        "storage": "Store in airtight container in cool dry place"
+    },
+    "super pack": {
+        "description": "Combo of our 3 premium oils (groundnut, coconut, sesame)",
+        "benefits": ["Variety of oils", "Cost effective", "Complete cooking solution", "Healthy combination"],
+        "usage": ["Daily cooking", "Different culinary uses", "Varied nutrition", "Gift option"],
+        "storage": "Store each oil as per individual requirements"
+    }
 }
 
 # Aliases and synonyms
@@ -58,7 +87,8 @@ alias_map = {
     "combo": "super pack", "sugar": "jaggery powder", "oil pack": "super pack",
     "oil set": "super pack", "oil bundle": "super pack", "oil collection": "super pack",
     "oil trio": "super pack", "oil variety": "super pack", "oil combo pack": "super pack",
-    "brown sugar": "jaggery powder", "natural sweetener": "jaggery powder"
+    "brown sugar": "jaggery powder", "natural sweetener": "jaggery powder",
+    "natu sakarai": "jaggery powder", "sakarai": "jaggery powder"
 }
 
 # Recommendations
@@ -71,24 +101,17 @@ recommendations = {
     "super pack": ["groundnut oil", "coconut oil", "sesame oil", "jaggery powder"]
 }
 
-# Intent keywords
-greetings = ["hi", "hello", "good morning", "good evening", "good afternoon", 
-            "hey", "yo", "hola", "what's up", "greetings", "hi there", 
-            "hello there", "hey there", "hiya", "howdy"]
-
-price_keywords = ["price", "cost", "how much", "rate", "pricing", "amount", "value"]
-
-benefit_keywords = ["benefit", "advantage", "why use", "good for", "healthy", 
-                   "nutritious", "wellness", "pros", "positive", "help"]
-
-order_keywords = ["order", "buy", "purchase", "get", "want", "need", "acquire",
-                 "shop", "checkout", "cart", "payment", "pay"]
-
-delivery_keywords = ["delivery", "shipping", "dispatch", "arrive", "receive",
-                    "when get", "time take", "courier", "ship", "transport"]
-
-contact_keywords = ["contact", "call", "phone", "number", "email", "address",
-                   "location", "where", "visit", "store", "shop"]
+# Keywords per intent
+greetings = ["hi", "hello", "good morning", "good evening", "good afternoon", "hey", "yo", "hola", "what's up", "greetings", "hi there", "hello there", "hey there", "hiya", "howdy", "hey!", "good day!", "hello, assistant"]
+price_keywords = ["price", "cost", "how much", "rate", "pricing", "amount", "value", "tell me the cost", "what's the rate", "product pricing", "list all prices", "give me product cost", "cost details", "item rates", "prices please"]
+image_keywords = ["images", "show image", "product image", "picture", "photos", "pics", "can i see images", "show me product pictures", "send me photos", "display images", "i want pictures", "visuals of items", "product visuals", "give me pics"]
+oil_keywords = ["oil", "oils", "ennai", "checku ennai", "oil types", "types of oil", "do you sell oils", "show your oils", "list oils", "oil categories", "ennai types", "cold pressed oils", "oil products", "all oil names"]
+benefit_keywords = ["benefit", "advantage", "why use", "good for", "healthy", "nutritious", "wellness", "pros", "positive", "help", "why is it good", "tell me health benefits", "product advantages", "is it nutritious", "healthy effects", "good for body", "any advantages"]
+usage_keywords = ["how to use", "usage", "application", "recipe", "cook", "use this for", "usage examples", "what can i do with this", "can i cook with it", "how to use this", "where can i use this", "what's this for", "any recipes", "application of this", "in what way do i use this", "cooking use"]
+order_keywords = ["order", "buy", "purchase", "get", "want", "need", "acquire", "shop", "checkout", "cart", "payment", "pay", "i'd like to place an order", "how to purchase", "add this to cart", "order now", "i want to shop", "book this product", "place this order"]
+delivery_keywords = ["delivery", "shipping", "dispatch", "arrive", "receive", "when get", "time take", "courier", "ship", "transport", "delivery charges", "is delivery free", "shipping days", "courier time", "how fast is delivery", "any delivery fee", "expected delivery"]
+contact_keywords = ["contact", "call", "phone", "number", "email", "address", "location", "where", "visit", "store", "shop", "give me contact info", "need your number", "i want your address", "what's your phone", "email id", "where to call", "contact number"]
+faq_keywords = ["cold-pressed", "organic", "preservatives", "how is oil made", "why choose", "pure jaggery", "store ghee", "shelf life", "return policy", "ship outside india"]
 
 # Helper functions
 def get_greeting():
@@ -125,17 +148,49 @@ def extract_entities(text):
 def detect_intent(text):
     text = text.lower()
     stemmed = stem_text(text)
-    
-    intents = {
+    return {
         'greeting': any(word in text for word in greetings),
-        'price_query': any(word in stemmed for word in price_keywords),
-        'benefit_query': any(word in stemmed for word in benefit_keywords),
-        'order_query': any(word in stemmed for word in order_keywords),
-        'delivery_query': any(word in stemmed for word in delivery_keywords),
-        'contact_query': any(word in stemmed for word in contact_keywords),
+        'price_query': any(word in text for word in price_keywords),
+        'image_query': any(word in text for word in image_keywords),
+        'oil_query': any(word in text for word in oil_keywords),
+        'benefit_query': any(word in text for word in benefit_keywords),
+        'usage_query': any(word in text for word in usage_keywords),
+        'order_query': any(word in text for word in order_keywords),
+        'delivery_query': any(word in text for word in delivery_keywords),
+        'contact_query': any(word in text for word in contact_keywords),
+        'faq_query': any(word in text for word in faq_keywords),
         'product_query': any(p.lower() in text for p in product_name_to_id.keys())
     }
-    return intents
+
+# Helper to get product images
+def get_product_images(product_name=None):
+    if product_name:
+        product_name = product_name.lower()
+        db_name = alias_map.get(product_name, product_name)
+
+        if db_name in ["oil", "oils", "ennai", "checku ennai"]:
+            all_images = []
+            for oil_name in ["groundnut oil", "coconut oil", "sesame oil"]:
+                item = products.find_one({"name": {"$regex": oil_name, "$options": "i"}})
+                if item and "images" in item:
+                    all_images.extend(item["images"])
+            return all_images
+
+        if db_name in ["sugar", "sakarai", "natu sakarai", "jaggery", "jaggery powder"]:
+            item = products.find_one({"name": {"$regex": "jaggery powder", "$options": "i"}})
+            if item and "images" in item:
+                return [img for img in item["images"]]
+
+        item = products.find_one({"name": {"$regex": db_name, "$options": "i"}})
+        if item and "images" in item:
+            return [img for img in item["images"]]
+    else:
+        all_images = []
+        for item in products.find():
+            if "images" in item:
+                all_images.extend(item["images"])
+        return all_images
+    return []
 
 def get_product_info(product_name, info_type):
     product_name = product_name.lower()
@@ -165,6 +220,13 @@ def get_specific_price(product_name):
         
     prices = [f"{q['size']} - ₹{q['price']}" for q in item.get("quantities", [])]
     return f"💰 <b>{item['name'].title()}</b>: {', '.join(prices)}"
+
+def get_all_benefits():
+    benefit_lines = []
+    for product, data in product_data.items():
+        if "benefits" in data:
+            benefit_lines.append(f"🌟 <b>{product.title()}</b>:<br>- " + "<br>- ".join(data["benefits"]))
+    return "<br><br>".join(benefit_lines)
 
 # Initialize product mappings
 product_map = {str(p["_id"]): p["name"] for p in products.find()}
@@ -207,6 +269,27 @@ def chatbot():
         
         return jsonify(response=f"Here are all our product prices:<br><br>{get_all_prices()}")
 
+    # Handle image queries
+    if intents['image_query']:
+        if entities['products']:
+            images = get_product_images(entities['products'][0])
+            if images:
+                return jsonify(response=f"Here are images of {entities['products'][0].title()}:", images=images)
+        
+        all_images = get_product_images()
+        if all_images:
+            return jsonify(response="Here are some of our product images:", images=random.sample(all_images, min(5, len(all_images))))
+        return jsonify(response="I couldn't find images for that product.")
+
+    # Handle oil queries
+    if intents['oil_query']:
+        oil_responses = [
+            "We offer these premium cold-pressed oils:<br>- Groundnut oil<br>- Coconut oil<br>- Sesame oil",
+            "Our oil collection includes:<br>- Traditional groundnut oil<br>- Pure coconut oil<br>- Nutritious sesame oil",
+            "You can choose from:<br>- Groundnut oil for cooking<br>- Coconut oil for hair/skin<br>- Sesame oil for its rich flavor"
+        ]
+        return jsonify(response=get_random_response(oil_responses))
+
     # Handle benefit queries
     if intents['benefit_query']:
         if entities['products']:
@@ -215,6 +298,15 @@ def chatbot():
                 return jsonify(response=f"🌟 Benefits of {entities['products'][0].title()}:<br>- " + "<br>- ".join(benefits))
         
         return jsonify(response=f"Here are health benefits of our products:<br><br>{get_all_benefits()}")
+
+    # Handle usage queries
+    if intents['usage_query']:
+        if entities['products']:
+            usage = get_product_info(entities['products'][0], "usage")
+            if usage:
+                return jsonify(response=f"🔧 How to use {entities['products'][0].title()}:<br>- " + "<br>- ".join(usage))
+        
+        return jsonify(response="Please specify which product you'd like usage information for.")
 
     # Handle product-specific queries
     if intents['product_query']:
@@ -248,10 +340,17 @@ def chatbot():
                     response_parts.append(f"🌟 Benefits:<br>- " + "<br>- ".join(benefits))
             
             # Add usage if mentioned
-            if "use" in user_input or "usage" in user_input:
+            if intents['usage_query']:
                 usage = get_product_info(product, "usage")
                 if usage:
                     response_parts.append(f"🔧 Usage:<br>- " + "<br>- ".join(usage))
+            
+            # Add images if image intent exists
+            if intents['image_query']:
+                images = get_product_images(product)
+                if images:
+                    response_parts.append(f"Here are images of {product.title()}:")
+                    return jsonify(response="<br><br>".join(response_parts), images=images)
             
             # Add recommendations
             if product.lower() in recommendations:
