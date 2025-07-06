@@ -77,7 +77,7 @@ product_benefits = {
 
 # Security and content filtering
 OFFENSIVE_KEYWORDS = {
-    "sex", "rape", "porn", "fuck", "shit", "ass", "dick", "rat", "cock", "pussy", 
+    "sex", "rape", "porn", "fuck", "shit", "ass", "dick", "rat", "cock", "pussy", "gommapunda", "goma", "kenathayoli", 
     "cunt", "bitch", "slut", "whore", "penis", "vagina", "boobs", "nude", "punda", "gotha", "thailii", "thayoli", "thayolli", "oombu", "ombu", "gomma", "kenap", "kenappunda", "gothapunda",
     "naked", "xxx", "adult", "nsfw", "hentai", "incest", "molest", "pedo"
 }
