@@ -55,6 +55,16 @@ alias_map = {
 
 combined_map = {**tanglish_map, **alias_map}
 
+# Product links
+product_links = {
+    "coconut oil": "https://isvaryam.com/products/cold-pressed-coconut-oil?sku_id=24459981",
+    "groundnut oil": "https://isvaryam.com/products/cold-pressed-groundnut-oil?sku_id=26795436",
+    "sesame oil": "https://isvaryam.com/products/cold-pressed-sesame-oil?sku_id=26795647",
+    "jaggery powder": "https://isvaryam.com/products/organic-jaggery-powder?sku_id=24463067",
+    "super pack": "https://isvaryam.com/products/super-pack-1-lt-coconut-oil-1-lt-sesame-oil-1-lt-groundnut-oil?sku_id=24633382",
+    "ghee": "https://isvaryam.com"  # Add actual ghee link when available
+}
+
 # Recommendations
 recommendations = {
     "groundnut oil": ["coconut oil", "sesame oil", "super pack", "ghee"],
@@ -121,7 +131,8 @@ def get_all_prices():
     for item in all_items:
         name = item.get("name", "Product").title()
         prices = [f"{q['size']} - ₹{q['price']}" for q in item.get("quantities", [])]
-        price_lines.append(f"💰 <b>{name}</b>: {', '.join(prices)}")
+        product_link = product_links.get(name.lower(), "https://isvaryam.com")
+        price_lines.append(f"💰 <b>{name}</b>: {', '.join(prices)} <a href='{product_link}' target='_blank'>[Buy Now]</a>")
     return "<br><br>".join(price_lines)
 
 def get_all_benefits():
@@ -135,7 +146,8 @@ def get_all_benefits():
             "Rich in nutrients and health benefits",
             "Premium quality product"
         ])
-        benefit_lines.append(f"🌟 <b>{name.title()}</b>:<br>- " + "<br>- ".join(benefits))
+        product_link = product_links.get(name, "https://isvaryam.com")
+        benefit_lines.append(f"🌟 <b>{name.title()}</b>:<br>- " + "<br>- ".join(benefits) + f"<br><a href='{product_link}' target='_blank'>[View Product]</a>")
     return "<br><br>".join(benefit_lines)
 
 def translate_tanglish_to_english(user_input):
@@ -286,84 +298,6 @@ def chatbot():
             "💡 I exist to share information about Isvaryam's natural products. How can I assist you?"
         ]
 
-        # Expanded location/contact responses
-        location_keywords = ["location", "where is isvaryam", "where is your store", "store address", 
-                            "address", "location of company", "physical store", "visit us", 
-                            "come to shop", "outlet", "shop location"]
-        
-        contact_keywords = ["contact", "phone", "email", "reach you", "call", "number", 
-                           "contact info", "customer care", "support", "helpline", "contact number"]
-
-        # Expanded delivery responses
-        delivery_keywords = ["delivery", "shipping", "how many days", "when will it reach", 
-                            "delivery time", "how fast", "dispatch", "courier", "shipment", 
-                            "arrival time", "when delivered", "reach my home", "reach my place",
-                            "shipping policy", "delivery options", "shipping cost", "delivery charges"]
-
-        # Expanded image responses
-        image_keywords = ["all images", "show all images", "product images", "pictures of products", 
-                         "show products visually", "display items", "product photos", "see products",
-                         "product gallery", "visual catalog", "show me pictures", "can i see"]
-
-        # Expanded product type responses
-        type_keywords = ["types of oil", "oil types", "types of products", "products offered", 
-                        "what do you sell", "offered by isvaryam", "range of oils", "product range",
-                        "product categories", "what products", "what items", "product list",
-                        "inventory", "catalog", "offerings"]
-
-        # Expanded order responses
-        order_keywords = ["how to order", "place an order", "order now", "buy", "want to buy", 
-                         "book", "purchase", "make a purchase", "get product", "acquire", 
-                         "procure", "checkout", "add to cart", "shopping", "ordering process",
-                         "payment", "online order", "website order", "where to buy"]
-
-        # Expanded tracking responses
-        track_keywords = ["track", "tracking", "track my order", "where is my order", 
-                         "order status", "check order", "tracking details", "how do i track",
-                         "order location", "shipment status", "delivery status", "where is package",
-                         "order update", "status update", "parcel tracking"]
-
-        # Expanded product list responses
-        product_list_keywords = ["products", "what do you have", "show all", "available items", 
-                                "list items", "what can i buy", "items available", "product catalog",
-                                "all offerings", "complete list", "full range", "entire collection"]
-
-        # Expanded price responses
-        all_price_keywords = ["product price", "all prices", "prices of products", "cost of all", 
-                             "price list", "how much", "pricing", "rate list", "cost", "rates",
-                             "price range", "amount", "product cost", "what's the price"]
-
-        # Expanded benefit/feature responses
-        benefit_keywords = ["benefits", "advantages", "features", "why choose", "good for", 
-                           "health benefits", "nutritional value", "why use", "pros", "uses",
-                           "how helps", "what's good", "positive effects", "nutrition", "healthy",
-                           "wellness", "advantages of"]
-
-        # Expanded payment responses
-        payment_keywords = ["payment methods", "how to pay", "payment options", "accepted payments",
-                           "credit card", "debit card", "upi", "paytm", "phonepe", "net banking",
-                           "cash on delivery", "cod", "online payment", "payment gateway"]
-
-        # Expanded return/refund responses
-        return_keywords = ["return policy", "refund", "exchange", "return product", "not satisfied",
-                          "wrong item", "damaged product", "return process", "how to return",
-                          "refund policy", "money back", "replace", "replacement"]
-
-        # Expanded quality responses
-        quality_keywords = ["quality", "how pure", "authentic", "original", "genuine", "certified",
-                           "organic", "natural", "purity", "quality check", "standards", "testing",
-                           "lab tested", "quality assurance", "how good"]
-
-        # Expanded discount responses
-        discount_keywords = ["discount", "offer", "coupon", "promo", "promotion", "deal", "special",
-                            "sale", "festival offer", "seasonal offer", "price off", "reduced price",
-                            "bargain", "savings", "cheaper", "lower price"]
-
-        # Expanded usage responses
-        usage_keywords = ["how to use", "usage", "how consume", "how apply", "application", "recipe",
-                         "cooking", "how cook", "how eat", "how take", "diet", "consumption",
-                         "dosage", "quantity", "amount to use"]
-
         # Handle greetings
         if any(greet in user_input for greet in greetings):
             return jsonify(response=get_random_response(greeting_responses))
@@ -373,7 +307,9 @@ def chatbot():
             return jsonify(response=get_random_response(silly_responses))
 
         # Handle location/contact queries
-        if any(word in user_input for word in location_keywords + contact_keywords):
+        if any(word in user_input for word in ["location", "where is isvaryam", "where is your store", "store address", 
+                                            "address", "location of company", "physical store", "visit us", 
+                                            "come to shop", "outlet", "shop location"]):
             contact_response = [
                 f"📞 Phone: {contact_data['phone']}<br>"
                 f"✉️ Email: {contact_data['email']}<br>"
@@ -392,7 +328,10 @@ def chatbot():
             return jsonify(response=get_random_response(contact_response))
 
         # Handle delivery queries
-        if any(word in user_input for word in delivery_keywords):
+        if any(word in user_input for word in ["delivery", "shipping", "how many days", "when will it reach", 
+                                            "delivery time", "how fast", "dispatch", "courier", "shipment", 
+                                            "arrival time", "when delivered", "reach my home", "reach my place",
+                                            "shipping policy", "delivery options", "shipping cost", "delivery charges"]):
             delivery_response = [
                 "🚚 We deliver to Coimbatore in 2 days and to other cities in 3–4 days.",
                 "📦 Delivery takes 2 days in Coimbatore and 3-4 days to other locations.",
@@ -401,111 +340,15 @@ def chatbot():
             return jsonify(response=get_random_response(delivery_response))
 
         # Handle product list queries
-        if any(word in user_input for word in product_list_keywords):
+        if any(word in user_input for word in ["products", "what do you have", "show all", "available items", 
+                                            "list items", "what can i buy", "items available", "product catalog",
+                                            "all offerings", "complete list", "full range", "entire collection"]):
             product_list_response = [
-                "📦 We offer: Groundnut Oil, Coconut Oil, Sesame Oil, Ghee, Jaggery Powder, and a Super Pack (1L each of 3 oils).",
-                "🛍️ Our products include: Groundnut Oil, Coconut Oil, Sesame Oil, Ghee, Jaggery Powder, and a Super Pack combo.",
-                "🛒 Available products: Groundnut Oil, Coconut Oil, Sesame Oil, Ghee, Jaggery Powder, and our popular Super Pack."
+                "📦 We offer: <a href='https://isvaryam.com/products/cold-pressed-groundnut-oil?sku_id=26795436' target='_blank'>Groundnut Oil</a>, <a href='https://isvaryam.com/products/cold-pressed-coconut-oil?sku_id=24459981' target='_blank'>Coconut Oil</a>, <a href='https://isvaryam.com/products/cold-pressed-sesame-oil?sku_id=26795647' target='_blank'>Sesame Oil</a>, Ghee, <a href='https://isvaryam.com/products/organic-jaggery-powder?sku_id=24463067' target='_blank'>Jaggery Powder</a>, and our <a href='https://isvaryam.com/products/super-pack-1-lt-coconut-oil-1-lt-sesame-oil-1-lt-groundnut-oil?sku_id=24633382' target='_blank'>Super Pack</a> (1L each of 3 oils).",
+                "🛍️ Our products include: <a href='https://isvaryam.com/products/cold-pressed-groundnut-oil?sku_id=26795436' target='_blank'>Groundnut Oil</a>, <a href='https://isvaryam.com/products/cold-pressed-coconut-oil?sku_id=24459981' target='_blank'>Coconut Oil</a>, <a href='https://isvaryam.com/products/cold-pressed-sesame-oil?sku_id=26795647' target='_blank'>Sesame Oil</a>, Ghee, <a href='https://isvaryam.com/products/organic-jaggery-powder?sku_id=24463067' target='_blank'>Jaggery Powder</a>, and a <a href='https://isvaryam.com/products/super-pack-1-lt-coconut-oil-1-lt-sesame-oil-1-lt-groundnut-oil?sku_id=24633382' target='_blank'>Super Pack</a> combo.",
+                "🛒 Available products: <a href='https://isvaryam.com/products/cold-pressed-groundnut-oil?sku_id=26795436' target='_blank'>Groundnut Oil</a>, <a href='https://isvaryam.com/products/cold-pressed-coconut-oil?sku_id=24459981' target='_blank'>Coconut Oil</a>, <a href='https://isvaryam.com/products/cold-pressed-sesame-oil?sku_id=26795647' target='_blank'>Sesame Oil</a>, Ghee, <a href='https://isvaryam.com/products/organic-jaggery-powder?sku_id=24463067' target='_blank'>Jaggery Powder</a>, and our popular <a href='https://isvaryam.com/products/super-pack-1-lt-coconut-oil-1-lt-sesame-oil-1-lt-groundnut-oil?sku_id=24633382' target='_blank'>Super Pack</a>."
             ]
             return jsonify(response=get_random_response(product_list_response))
-
-        # Handle image requests
-        if any(word in user_input for word in image_keywords):
-            all_items = products.find()
-            img_block = ""
-            for item in all_items:
-                name = item.get("name", "Product")
-                images = item.get("images", [])[:1]
-                for img in images:
-                    img_block += f"<b>{name.title()}</b><br><img src='{img}' width='100' style='margin:5px;'><br><br>"
-            return jsonify(response=f"🖼️ Our product gallery:<br><br>{img_block}")
-
-        # Handle product type queries
-        if any(word in user_input for word in type_keywords):
-            oils = [name.title() for name in ingredients_data.keys()]
-            type_response = [
-                f"🛍️ We offer the following: {', '.join(oils)}",
-                f"🌿 Our natural products include: {', '.join(oils)}",
-                f"✨ Available items: {', '.join(oils)}"
-            ]
-            return jsonify(response=get_random_response(type_response))
-
-        # Specific oil type queries
-        if user_input.strip() in ["oil", "oils", "types of oil", "oil types"]:
-            oil_names = [name.title() for name in product_name_to_id.keys() if "oil" in name]
-            oil_response = [
-                f"🛢️ We offer these oils: {', '.join(oil_names)}",
-                f"🌱 Our premium oils: {', '.join(oil_names)}",
-                f"💧 Available oils: {', '.join(oil_names)}"
-            ]
-            return jsonify(response=get_random_response(oil_response))
-
-        # Handle order queries
-        if any(word in user_input for word in order_keywords):
-            order_response = [
-                f"🛒 To place an order, call us at 📞 {contact_data['phone']} or visit our store at {contact_data['address']}",
-                f"📲 You can order by calling {contact_data['phone']} or visiting our location at {contact_data['address']}",
-                f"💳 For orders, please contact us at {contact_data['phone']} or come to {contact_data['address']}"
-            ]
-            return jsonify(response=get_random_response(order_response))
-
-        # Handle tracking queries
-        if any(word in user_input for word in track_keywords):
-            track_response = [
-                f"📦 For tracking, please call 📞 {contact_data['phone']} with your order number",
-                f"🚚 To check your order status, contact us at {contact_data['phone']}",
-                f"🔍 Please call {contact_data['phone']} for tracking information with your order details"
-            ]
-            return jsonify(response=get_random_response(track_response))
-
-        # Handle price list queries
-        if any(word in user_input for word in all_price_keywords):
-            return jsonify(response=f"Here are all our product prices:<br><br>{get_all_prices()}")
-
-        # Handle payment method queries
-        if any(word in user_input for word in payment_keywords):
-            payment_response = [
-                "💳 We accept: Cash on Delivery (COD), UPI, Credit/Debit Cards, and Net Banking",
-                "💰 Payment options: COD, UPI (PhonePe, Google Pay, Paytm), Cards, and Net Banking",
-                "🪙 You can pay via: Cash on Delivery, all major UPI apps, Credit/Debit Cards"
-            ]
-            return jsonify(response=get_random_response(payment_response))
-
-        # Handle return/refund queries
-        if any(word in user_input for word in return_keywords):
-            return_response = [
-                "🔄 Return Policy: You can return products within 7 days if unopened and in original condition",
-                "♻️ We accept returns within 7 days for unopened products in original packaging",
-                "🛍️ Returns allowed within 1 week for unused products with original packaging and receipt"
-            ]
-            return jsonify(response=get_random_response(return_response))
-
-        # Handle quality queries
-        if any(word in user_input for word in quality_keywords):
-            quality_response = [
-                "🌿 All our products are 100% natural, organic, and lab-tested for purity",
-                "✨ We guarantee authentic, high-quality products with strict quality checks",
-                "🏆 Isvaryam products are certified organic and tested for highest quality standards"
-            ]
-            return jsonify(response=get_random_response(quality_response))
-
-        # Handle discount queries
-        if any(word in user_input for word in discount_keywords):
-            discount_response = [
-                "🎁 Special offers available during festivals - call us to check current deals!",
-                f"💸 We occasionally run promotions - contact us at {contact_data['phone']} for current discounts",
-                f"🛍️ Check with our team at {contact_data['phone']} for any ongoing offers or combo deals"
-            ]
-            return jsonify(response=get_random_response(discount_response))
-
-        # Handle usage queries
-        if any(word in user_input for word in usage_keywords):
-            usage_response = [
-                "🍳 Our oils are perfect for cooking, while ghee and jaggery can be used in food preparation",
-                "🧑‍🍳 Usage varies by product - oils for cooking, ghee for flavor, jaggery as sweetener",
-                "🥘 Each product has different uses - contact us for specific usage recommendations"
-            ]
-            return jsonify(response=get_random_response(usage_response))
 
         # Extract product name with Tanglish support
         pname = extract_product_name(user_input)
@@ -518,7 +361,12 @@ def chatbot():
                     "Rich in nutrients and health benefits",
                     "Premium quality product"
                 ])
-                return jsonify(response=f"🌟 Benefits of {pname.title()}:<br>- " + "<br>- ".join(benefits))
+                product_link = product_links.get(pname, "https://isvaryam.com")
+                return jsonify(
+                    response=f"🌟 Benefits of {pname.title()}:<br>- " + 
+                    "<br>- ".join(benefits) + 
+                    f"<br><br><a href='{product_link}' target='_blank'>[View Product Details]</a>"
+                )
 
             # Reviews intent
             if any(word in user_input for word in ["reviews", "product reviews", "show reviews", "customer feedback", "testimonials"]):
@@ -526,9 +374,15 @@ def chatbot():
                 if prod_id:
                     revs = list(reviews.find({"productId": prod_id}))
                     if not revs:
-                        return jsonify(response=f"No reviews yet for {pname.title()}.")
+                        product_link = product_links.get(pname, "https://isvaryam.com")
+                        return jsonify(response=f"No reviews yet for {pname.title()}. <a href='{product_link}' target='_blank'>Be the first to review!</a>")
                     response_lines = [f"🗣️ {r['review']} ({r.get('rating', 0)}/5)" for r in revs]
-                    return jsonify(response=f"<b>Reviews for {pname.title()}:</b><br>" + "<br>".join(response_lines))
+                    product_link = product_links.get(pname, "https://isvaryam.com")
+                    return jsonify(
+                        response=f"<b>Reviews for {pname.title()}:</b><br>" + 
+                        "<br>".join(response_lines) + 
+                        f"<br><br><a href='{product_link}' target='_blank'>[Purchase Now]</a>"
+                    )
 
             # Rating intent
             if "rating" in user_input:
@@ -537,9 +391,17 @@ def chatbot():
                     product_reviews = list(reviews.find({"productId": prod_id}))
                     if product_reviews:
                         avg = sum([r.get("rating", 0) for r in product_reviews]) / len(product_reviews)
-                        return jsonify(response=f"⭐ Average rating for {pname.title()}: {round(avg,1)}/5 based on {len(product_reviews)} reviews.")
+                        product_link = product_links.get(pname, "https://isvaryam.com")
+                        return jsonify(
+                            response=f"⭐ Average rating for {pname.title()}: {round(avg,1)}/5 based on {len(product_reviews)} reviews.<br>" +
+                            f"<a href='{product_link}' target='_blank'>[View Product]</a>"
+                        )
                     else:
-                        return jsonify(response=f"⚠️ No ratings available for {pname.title()}.")
+                        product_link = product_links.get(pname, "https://isvaryam.com")
+                        return jsonify(
+                            response=f"⚠️ No ratings available for {pname.title()}. " +
+                            f"<a href='{product_link}' target='_blank'>[Be the first to review]</a>"
+                        )
 
             # Get product info from database
             db_name = combined_map.get(pname, pname)
@@ -548,10 +410,11 @@ def chatbot():
                 return jsonify(response=f"Sorry, I couldn't find information for {db_name.title()}.")
 
             response_parts = []
+            product_link = product_links.get(db_name, "https://isvaryam.com")
 
             if any(word in user_input for word in ["price", "cost", "rate", "how much"]):
                 prices = [f"{q['size']} - ₹{q['price']}" for q in item.get("quantities", [])]
-                response_parts.append(f"🛒 {db_name.title()} Prices: {', '.join(prices)}")
+                response_parts.append(f"🛒 {db_name.title()} Prices: {', '.join(prices)} <a href='{product_link}' target='_blank'>[Buy Now]</a>")
 
             if any(word in user_input for word in ["ingredient", "contains", "what is in", "made of"]):
                 if db_name in ingredients_data:
@@ -566,7 +429,10 @@ def chatbot():
                     img_html = " ".join([f"<img src='{img}' width='100' style='margin:5px;'/>" for img in imgs])
                     response_parts.append(f"📸 Images of {db_name.title()}:<br>{img_html}")
 
-            if any(word in user_input for word in benefit_keywords):
+            if any(word in user_input for word in ["benefit", "advantages", "features", "why choose", "good for", 
+                                                "health benefits", "nutritional value", "why use", "pros", "uses",
+                                                "how helps", "what's good", "positive effects", "nutrition", "healthy",
+                                                "wellness", "advantages of"]):
                 benefits = product_benefits.get(db_name, [
                     "100% natural and chemical-free",
                     "Made with traditional methods",
@@ -579,9 +445,16 @@ def chatbot():
                 desc = item.get("description", "This is a premium product made with care.")
                 response_parts.append(f"📝 {db_name.title()}: {desc}")
 
+            # Always include product link at the end
+            response_parts.append(f"<a href='{product_link}' target='_blank'>[View Product Details]</a>")
+
             related = recommendations.get(db_name, [])
             if related:
-                response_parts.append(f"🤝 Customers also buy: {', '.join([r.title() for r in related])}")
+                related_links = []
+                for r in related:
+                    r_link = product_links.get(r, "https://isvaryam.com")
+                    related_links.append(f"<a href='{r_link}' target='_blank'>{r.title()}</a>")
+                response_parts.append(f"🤝 Customers also buy: {', '.join(related_links)}")
 
             return jsonify(response="<br><br>".join(response_parts))
 
@@ -593,7 +466,10 @@ def chatbot():
                 prod_id = str(rev.get("productId"))
                 prod_name = product_map.get(prod_id, "Unknown Product")
                 text = rev.get("review", "No text")
-                product_reviews.setdefault(prod_name, []).append(f"🗣️ {text} ({rev.get('rating', 0)}/5)")
+                product_link = product_links.get(prod_name.lower(), "https://isvaryam.com")
+                product_reviews.setdefault(prod_name, []).append(
+                    f"🗣️ {text} ({rev.get('rating', 0)}/5) <a href='{product_link}' target='_blank'>[View Product]</a>"
+                )
             response = ""
             for pname, revs in product_reviews.items():
                 response += f"<b>{pname.title()}</b>:<br>" + "<br>".join(revs) + "<br><br>"
@@ -604,11 +480,18 @@ def chatbot():
             response_lines = []
             for pid, pname in product_map.items():
                 product_reviews = list(reviews.find({"productId": ObjectId(pid)}))
+                product_link = product_links.get(pname.lower(), "https://isvaryam.com")
                 if product_reviews:
                     avg = sum([r.get("rating", 0) for r in product_reviews]) / len(product_reviews)
-                    response_lines.append(f"⭐ {pname.title()}: {round(avg, 1)}/5 ({len(product_reviews)} reviews)")
+                    response_lines.append(
+                        f"⭐ {pname.title()}: {round(avg, 1)}/5 ({len(product_reviews)} reviews) " +
+                        f"<a href='{product_link}' target='_blank'>[View Product]</a>"
+                    )
                 else:
-                    response_lines.append(f"⭐ {pname.title()}: No reviews yet")
+                    response_lines.append(
+                        f"⭐ {pname.title()}: No reviews yet " +
+                        f"<a href='{product_link}' target='_blank'>[Be the first to review]</a>"
+                    )
             return jsonify(response="<br><br>".join(response_lines))
 
         # Default response with more suggestions
