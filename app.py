@@ -6,6 +6,7 @@ from datetime import datetime
 from difflib import get_close_matches
 import os
 import random
+import re
 
 app = Flask(__name__, static_url_path='/static', static_folder='static', template_folder='templates')
 
@@ -22,14 +23,46 @@ with open("ingredients.json") as f:
 with open("contact.json") as f:
     contact_data = json.load(f)
 
-# Aliases
+# Tanglish to English product mapping
+tanglish_map = {
+    # Oils
+    "chekku ennai": "sesame oil", "chekku oil": "sesame oil", "chekku": "sesame oil",
+    "naalennai": "sesame oil", "gingelly oil": "sesame oil", "nellennai": "sesame oil",
+    "kadalai ennai": "groundnut oil", "groundnut ennai": "groundnut oil", 
+    "kadalai oil": "groundnut oil", "verkadalai ennai": "groundnut oil",
+    "coconut ennai": "coconut oil", "thengai ennai": "coconut oil", 
+    "thengai oil": "coconut oil", "vennai": "coconut oil",
+    
+    # Other products
+    "sakkarai": "jaggery powder", "vellam": "jaggery powder", 
+    "karupatti": "jaggery powder", "panai vellam": "jaggery powder",
+    "nei": "ghee", "vennai": "ghee", "thuppa": "ghee",
+    
+    # Combo packs
+    "combo pack": "super pack", "oil combo": "super pack", 
+    "3 oil combo": "super pack", "combo": "super pack",
+    "oil pack": "super pack", "oil set": "super pack", 
+    "oil bundle": "super pack", "oil collection": "super pack",
+    "oil trio": "super pack", "oil variety": "super pack", 
+    "oil combo pack": "super pack",
+    
+    # Other terms
+    "sugar": "jaggery powder", "brown sugar": "jaggery powder", 
+    "natural sweetener": "jaggery powder"
+}
+
+# Aliases (English variations)
 alias_map = {
     "combo pack": "super pack", "oil combo": "super pack", "3 oil combo": "super pack",
     "combo": "super pack", "sugar": "jaggery powder", "oil pack": "super pack",
     "oil set": "super pack", "oil bundle": "super pack", "oil collection": "super pack",
     "oil trio": "super pack", "oil variety": "super pack", "oil combo pack": "super pack",
-    "brown sugar": "jaggery powder", "natural sweetener": "jaggery powder"
+    "brown sugar": "jaggery powder", "natural sweetener": "jaggery powder",
+    "gingelly oil": "sesame oil", "peanut oil": "groundnut oil"
 }
+
+# Combine both mappings
+combined_map = {**tanglish_map, **alias_map}
 
 # Recommendations
 recommendations = {
@@ -88,6 +121,92 @@ def get_all_benefits():
         ])
         benefit_lines.append(f"🌟 <b>{name.title()}</b>:<br>- " + "<br>- ".join(benefits))
     return "<br><br>".join(benefit_lines)
+
+def translate_tanglish_to_english(user_input):
+    """Convert Tanglish terms to standard product names"""
+    user_input = user_input.lower()
+    
+    # First check for exact matches
+    for tanglish, english in combined_map.items():
+        if tanglish in user_input:
+            return english
+    
+    # Then check for partial matches with word boundaries
+    words = re.findall(r'\b\w+\b', user_input)
+    for word in words:
+        if word in combined_map:
+            return combined_map[word]
+    
+    # Check for common oil terms
+    oil_terms = ["oil", "ennai", "taila", "thailam"]
+    if any(term in user_input for term in oil_terms):
+        if "kadalai" in user_input or "peanut" in user_input or "groundnut" in user_input:
+            return "groundnut oil"
+        elif "thengai" in user_input or "coconut" in user_input:
+            return "coconut oil"
+        elif "chekku" in user_input or "gingelly" in user_input or "nalla" in user_input or "gingerly" in user_input:
+            return "sesame oil"
+        elif "isvaryam" in user_input:
+            return None  # Let the main logic handle brand-specific queries
+    
+    # Check for other product terms
+    if "sakkarai" in user_input or "vellam" in user_input or "karupatti" in user_input:
+        return "jaggery powder"
+    elif "nei" in user_input or "ghee" in user_input or "thuppa" in user_input:
+        return "ghee"
+    
+    return None
+
+def extract_product_name(user_input):
+    """Extract product name from user input with Tanglish support"""
+    # First try Tanglish translation
+    translated = translate_tanglish_to_english(user_input)
+    if translated:
+        return translated
+    
+    # Then check for exact product names
+    user_input = user_input.lower()
+    for pname in product_name_to_id.keys():
+        if pname in user_input:
+            return pname
+    
+    # Check for partial matches with word boundaries
+    words = re.findall(r'\b\w+\b', user_input)
+    for word in words:
+        if word in combined_map:
+            return combined_map[word]
+    
+    # Check for generic oil queries only if brand is mentioned
+    if "oil" in user_input and ("isvaryam" in user_input or "your" in user_input or "product" in user_input):
+        if "groundnut" in user_input or "peanut" in user_input:
+            return "groundnut oil"
+        elif "coconut" in user_input:
+            return "coconut oil"
+        elif "sesame" in user_input or "gingelly" in user_input:
+            return "sesame oil"
+        elif "ghee" in user_input:
+            return "ghee"
+        elif "jaggery" in user_input or "sugar" in user_input:
+            return "jaggery powder"
+        elif "combo" in user_input or "pack" in user_input:
+            return "super pack"
+    
+    # Fuzzy match product info
+    all_product_names = list(ingredients_data.keys()) + list(combined_map.keys())
+    words = user_input.split()
+    matched = get_close_matches(" ".join(words), all_product_names, n=1, cutoff=0.6)
+    pname = matched[0] if matched else None
+    if not pname:
+        for word in words:
+            match = get_close_matches(word, all_product_names, n=1, cutoff=0.8)
+            if match:
+                pname = match[0]
+                break
+    
+    if pname:
+        return combined_map.get(pname, pname)
+    
+    return None
 
 @app.route("/")
 def index():
@@ -361,99 +480,42 @@ def chatbot():
         ]
         return jsonify(response=get_random_response(usage_response))
 
-    # Handle benefit queries
-    if "benefit" in user_input or "advantage" in user_input or any(word in user_input for word in ["good for", "why use"]):
-        found_product = None
-        for pname in product_name_to_id.keys():
-            if pname in user_input:
-                found_product = pname
-                break
-        if not found_product and "sugar" in user_input:
-            found_product = "jaggery powder"
-
-        if found_product:
-            benefits = product_benefits.get(found_product, [
+    # Extract product name with Tanglish support
+    pname = extract_product_name(user_input)
+    if pname:
+        # Handle benefit queries
+        if "benefit" in user_input or "advantage" in user_input or any(word in user_input for word in ["good for", "why use"]):
+            benefits = product_benefits.get(pname, [
                 "100% natural and chemical-free",
                 "Made with traditional methods",
                 "Rich in nutrients and health benefits",
                 "Premium quality product"
             ])
-            return jsonify(response=f"🌟 Benefits of {found_product.title()}:<br>- " + "<br>- ".join(benefits))
+            return jsonify(response=f"🌟 Benefits of {pname.title()}:<br>- " + "<br>- ".join(benefits))
 
-    # Reviews intent
-    if any(word in user_input for word in ["reviews", "product reviews", "show reviews", "customer feedback", "testimonials"]):
-        review_list = reviews.find()
-        product_reviews = {}
-        for rev in review_list:
-            prod_id = str(rev.get("productId"))
-            prod_name = product_map.get(prod_id, "Unknown Product")
-            text = rev.get("review", "No text")
-            product_reviews.setdefault(prod_name, []).append(f"🗣️ {text} ({rev.get('rating', 0)}/5)")
-        response = ""
-        for pname, revs in product_reviews.items():
-            response += f"<b>{pname.title()}</b>:<br>" + "<br>".join(revs) + "<br><br>"
-        return jsonify(response=response.strip() if response else "No reviews available yet.")
+        # Reviews intent
+        if any(word in user_input for word in ["reviews", "product reviews", "show reviews", "customer feedback", "testimonials"]):
+            prod_id = ObjectId(product_name_to_id.get(pname, ""))
+            if prod_id:
+                revs = list(reviews.find({"productId": prod_id}))
+                if not revs:
+                    return jsonify(response=f"No reviews yet for {pname.title()}.")
+                response_lines = [f"🗣️ {r['review']} ({r.get('rating', 0)}/5)" for r in revs]
+                return jsonify(response=f"<b>Reviews for {pname.title()}:</b><br>" + "<br>".join(response_lines))
 
-    if "review" in user_input:
-        found_product = None
-        for pname in product_name_to_id.keys():
-            if pname in user_input:
-                found_product = pname
-                break
-        if not found_product and "sugar" in user_input:
-            found_product = "jaggery powder"
+        # Rating intent
+        if "rating" in user_input:
+            prod_id = ObjectId(product_name_to_id.get(pname, ""))
+            if prod_id:
+                product_reviews = list(reviews.find({"productId": prod_id}))
+                if product_reviews:
+                    avg = sum([r.get("rating", 0) for r in product_reviews]) / len(product_reviews)
+                    return jsonify(response=f"⭐ Average rating for {pname.title()}: {round(avg,1)}/5 based on {len(product_reviews)} reviews.")
+                else:
+                    return jsonify(response=f"⚠️ No ratings available for {pname.title()}.")
 
-        if found_product:
-            prod_id = ObjectId(product_name_to_id[found_product])
-            revs = list(reviews.find({"productId": prod_id}))
-            if not revs:
-                return jsonify(response=f"No reviews yet for {found_product.title()}.")
-            response_lines = [f"🗣️ {r['review']} ({r.get('rating', 0)}/5)" for r in revs]
-            return jsonify(response=f"<b>Reviews for {found_product.title()}:</b><br>" + "<br>".join(response_lines))
-
-    if any(word in user_input for word in ["ratings", "rate all", "average rating", "all ratings"]):
-        response_lines = []
-        for pid, pname in product_map.items():
-            product_reviews = list(reviews.find({"productId": ObjectId(pid)}))
-            if product_reviews:
-                avg = sum([r.get("rating", 0) for r in product_reviews]) / len(product_reviews)
-                response_lines.append(f"⭐ {pname.title()}: {round(avg, 1)}/5 ({len(product_reviews)} reviews)")
-            else:
-                response_lines.append(f"⭐ {pname.title()}: No reviews yet")
-        return jsonify(response="<br><br>".join(response_lines))
-
-    if "rating" in user_input:
-        found_product = None
-        for pname in product_name_to_id.keys():
-            if pname in user_input:
-                found_product = pname
-                break
-        if not found_product and "sugar" in user_input:
-            found_product = "jaggery powder"
-
-        if found_product:
-            prod_id = ObjectId(product_name_to_id[found_product])
-            product_reviews = list(reviews.find({"productId": prod_id}))
-            if product_reviews:
-                avg = sum([r.get("rating", 0) for r in product_reviews]) / len(product_reviews)
-                return jsonify(response=f"⭐ Average rating for {found_product.title()}: {round(avg,1)}/5 based on {len(product_reviews)} reviews.")
-            else:
-                return jsonify(response=f"⚠️ No ratings available for {found_product.title()}.")
-
-    # Fuzzy match product info
-    all_product_names = list(ingredients_data.keys()) + list(alias_map.keys())
-    words = user_input.split()
-    matched = get_close_matches(" ".join(words), all_product_names, n=1, cutoff=0.6)
-    pname = matched[0] if matched else None
-    if not pname:
-        for word in words:
-            match = get_close_matches(word, all_product_names, n=1, cutoff=0.8)
-            if match:
-                pname = match[0]
-                break
-
-    if pname:
-        db_name = alias_map.get(pname, pname)
+        # Get product info from database
+        db_name = combined_map.get(pname, pname)
         item = products.find_one({"name": {"$regex": db_name, "$options": "i"}})
         if not item:
             return jsonify(response=f"Sorry, I couldn't find information for {db_name.title()}.")
@@ -495,6 +557,32 @@ def chatbot():
             response_parts.append(f"🤝 Customers also buy: {', '.join([r.title() for r in related])}")
 
         return jsonify(response="<br><br>".join(response_parts))
+
+    # Handle all reviews request
+    if any(word in user_input for word in ["reviews", "product reviews", "show reviews", "customer feedback", "testimonials"]):
+        review_list = reviews.find()
+        product_reviews = {}
+        for rev in review_list:
+            prod_id = str(rev.get("productId"))
+            prod_name = product_map.get(prod_id, "Unknown Product")
+            text = rev.get("review", "No text")
+            product_reviews.setdefault(prod_name, []).append(f"🗣️ {text} ({rev.get('rating', 0)}/5)")
+        response = ""
+        for pname, revs in product_reviews.items():
+            response += f"<b>{pname.title()}</b>:<br>" + "<br>".join(revs) + "<br><br>"
+        return jsonify(response=response.strip() if response else "No reviews available yet.")
+
+    # Handle all ratings request
+    if any(word in user_input for word in ["ratings", "rate all", "average rating", "all ratings"]):
+        response_lines = []
+        for pid, pname in product_map.items():
+            product_reviews = list(reviews.find({"productId": ObjectId(pid)}))
+            if product_reviews:
+                avg = sum([r.get("rating", 0) for r in product_reviews]) / len(product_reviews)
+                response_lines.append(f"⭐ {pname.title()}: {round(avg, 1)}/5 ({len(product_reviews)} reviews)")
+            else:
+                response_lines.append(f"⭐ {pname.title()}: No reviews yet")
+        return jsonify(response="<br><br>".join(response_lines))
 
     # Default response with more suggestions
     default_responses = [
