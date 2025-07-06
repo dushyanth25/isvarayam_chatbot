@@ -77,15 +77,15 @@ product_benefits = {
 
 # Security and content filtering
 OFFENSIVE_KEYWORDS = {
-    "sex", "rape", "porn", "fuck", "shit", "ass", "dick", "cock", "pussy", 
+    "sex", "rape", "porn", "fuck", "shit", "ass", "dick", "rat", "cock", "pussy", 
     "cunt", "bitch", "slut", "whore", "penis", "vagina", "boobs", "nude",
     "naked", "xxx", "adult", "nsfw", "hentai", "incest", "molest", "pedo"
 }
 
 UNRELATED_KEYWORDS = {
-    "movie", "sports", "music", "politics", "religion", "football", "cricket",
+    "movie", "sports", "music", "politics", "religion", "football", "cricket","lusu","mairu"
     "weather", "news", "bitcoin", "crypto", "stock", "elon", "musk", "ai",
-    "chatgpt", "google", "facebook", "tiktok", "instagram", "whatsapp"
+    "chatgpt", "google", "facebook", "tiktok", "instagram", "whatsapp","pranaesh","sannam","deepak"
 }
 
 PRODUCT_GUIDANCE_RESPONSES = [
