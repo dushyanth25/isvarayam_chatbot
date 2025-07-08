@@ -30,6 +30,7 @@ tanglish_map = {
     "kadalai ennai": "groundnut oil", "groundnut ennai": "groundnut oil", 
     "kadalai oil": "groundnut oil", "verkadalai ennai": "groundnut oil",
     "coconut ennai": "coconut oil", "thengai ennai": "coconut oil", 
+    "ennai": "oil", "thengai ennai": "coconut oil", 
     "thengai oil": "coconut oil", "vennai": "coconut oil",
     "sakkarai": "jaggery powder", "vellam": "jaggery powder", 
     "karupatti": "jaggery powder", "panai vellam": "jaggery powder",
@@ -307,7 +308,7 @@ def chatbot():
             return jsonify(response=get_random_response(silly_responses))
 
         # Handle location/contact queries
-        if any(word in user_input for word in ["location", "where is isvaryam", "where is your store", "store address", 
+        if any(word in user_input for word in ["location","contact","contact isvaryam","isvaryam contact","isvaryam location","location of isvaryam", "where is isvaryam", "where is your store", "store address", 
                                             "address", "location of company", "physical store", "visit us", 
                                             "come to shop", "outlet", "shop location"]):
             contact_response = [
@@ -328,7 +329,7 @@ def chatbot():
             return jsonify(response=get_random_response(contact_response))
 
         # Handle delivery queries
-        if any(word in user_input for word in ["delivery", "shipping", "how many days", "when will it reach", 
+        if any(word in user_input for word in ["delivery","deliver", "shipping", "how many days", "when will it reach", 
                                             "delivery time", "how fast", "dispatch", "courier", "shipment", 
                                             "arrival time", "when delivered", "reach my home", "reach my place",
                                             "shipping policy", "delivery options", "shipping cost", "delivery charges"]):
@@ -340,7 +341,7 @@ def chatbot():
             return jsonify(response=get_random_response(delivery_response))
 
         # Handle product list queries
-        if any(word in user_input for word in ["products", "what do you have", "show all", "available items", 
+        if any(word in user_input for word in ["products","isvaryam", "what do you have", "show all", "available items", 
                                             "list items", "what can i buy", "items available", "product catalog",
                                             "all offerings", "complete list", "full range", "entire collection"]):
             product_list_response = [
