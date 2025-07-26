@@ -274,7 +274,7 @@ def chatbot():
             return jsonify(response=f"Here are the benefits of all our products:<br><br>{get_all_benefits()}")
 
         # Expanded greeting responses
-        greetings = ["hi", "hello", "good morning", "good evening", "good afternoon", 
+        greetings = ["hi", "hello", 
                     "hey", "yo", "hola", "what's up", "greetings", "hi there", 
                     "hello there", "hey there", "hiya", "howdy"]
         
