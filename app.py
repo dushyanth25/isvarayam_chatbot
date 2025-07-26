@@ -118,10 +118,10 @@ def is_invalid_query(user_input):
 def get_greeting():
     hour = datetime.now().hour
     if hour < 12:
-        return "Good morning ☀️"
+        return "Good Day"
     elif hour < 17:
-        return "Good afternoon 🌤️"
-    return "Good evening 🌙"
+        return "Good Day"
+    return "Good Day"
 
 def get_random_response(responses):
     return random.choice(responses)
