@@ -27,8 +27,9 @@ def test_security_headers(client):
     resp = client.get("/")
     assert resp.status_code == 200
     assert resp.headers.get("X-Content-Type-Options") == "nosniff"
-    assert resp.headers.get("X-Frame-Options") == "SAMEORIGIN"
-    assert "Content-Security-Policy" in resp.headers
+    assert "X-Frame-Options" not in resp.headers
+    csp = resp.headers.get("Content-Security-Policy", "")
+    assert "frame-ancestors 'self' https://www.isvaryam.com;" in csp
 
 
 def test_chatbot_validation_missing_message(client):

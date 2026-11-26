@@ -77,11 +77,12 @@ def internal_error_handler(e):
 
 
 _ORIGIN_PATTERN = re.compile(r"^https?://[a-zA-Z0-9.-]+(?::\d+)?$")
+DEFAULT_FRAME_ORIGINS = "https://www.isvaryam.com"
 
 
 def _get_allowed_frame_origins() -> list[str]:
     """Parse and validate ALLOWED_FRAME_ORIGINS env var (rejects wildcards)."""
-    raw = os.environ.get("ALLOWED_FRAME_ORIGINS", "")
+    raw = os.environ.get("ALLOWED_FRAME_ORIGINS", DEFAULT_FRAME_ORIGINS)
     valid_origins: list[str] = []
     for token in re.split(r"[\s,]+", raw.strip()):
         origin = token.rstrip("/")
