@@ -7,6 +7,7 @@ LLM chatbot interactions with comprehensive validation and security headers.
 from datetime import datetime, timezone
 import logging
 import os
+import re
 
 from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request, Response
@@ -75,11 +76,35 @@ def internal_error_handler(e):
     }), 500
 
 
+_ORIGIN_PATTERN = re.compile(r"^https?://[a-zA-Z0-9.-]+(?::\d+)?$")
+
+
+def _get_allowed_frame_origins() -> list[str]:
+    """Parse and validate ALLOWED_FRAME_ORIGINS env var (rejects wildcards)."""
+    raw = os.environ.get("ALLOWED_FRAME_ORIGINS", "")
+    valid_origins: list[str] = []
+    for token in re.split(r"[\s,]+", raw.strip()):
+        origin = token.rstrip("/")
+        if not origin or origin == "'self'" or "*" in origin:
+            continue
+        if _ORIGIN_PATTERN.match(origin) and origin not in valid_origins:
+            valid_origins.append(origin)
+    return valid_origins
+
+
 @app.after_request
 def set_security_headers(response: Response) -> Response:
     """Enforce standard security headers and secure CSP."""
+    allowed_origins = _get_allowed_frame_origins()
+    frame_ancestors = "'self'" if not allowed_origins else f"'self' {' '.join(allowed_origins)}"
+
     response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    if allowed_origins:
+        # Omit X-Frame-Options when cross-origin frame-ancestors are explicitly allowed
+        # so legacy SAMEORIGIN does not conflict with CSP frame-ancestors.
+        response.headers.pop("X-Frame-Options", None)
+    else:
+        response.headers["X-Frame-Options"] = "SAMEORIGIN"
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     # Strict CSP: no 'unsafe-inline' for script-src since chat.js is external
@@ -90,7 +115,7 @@ def set_security_headers(response: Response) -> Response:
         "img-src 'self' data: https:; "
         "font-src 'self' https://cdnjs.cloudflare.com; "
         "connect-src 'self'; "
-        "frame-ancestors 'self'; "
+        f"frame-ancestors {frame_ancestors}; "
         "base-uri 'self'; "
         "form-action 'self';"
     )

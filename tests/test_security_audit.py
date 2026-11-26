@@ -112,6 +112,21 @@ def test_strict_csp_no_unsafe_inline_for_scripts(client):
     assert "base-uri 'self'" in csp
 
 
+def test_csp_frame_ancestors_allows_configured_origin_and_blocks_wildcard(client):
+    """Verify ALLOWED_FRAME_ORIGINS updates frame-ancestors, omits conflicting XFO, and rejects '*'."""
+    with patch.dict("os.environ", {"ALLOWED_FRAME_ORIGINS": "https://isvaryam.com, https://www.isvaryam.com"}):
+        resp = client.get("/")
+        csp = resp.headers.get("Content-Security-Policy", "")
+        assert "frame-ancestors 'self' https://isvaryam.com https://www.isvaryam.com;" in csp
+        assert "X-Frame-Options" not in resp.headers
+
+    with patch.dict("os.environ", {"ALLOWED_FRAME_ORIGINS": "*"}):
+        resp = client.get("/")
+        csp = resp.headers.get("Content-Security-Policy", "")
+        assert "frame-ancestors 'self';" in csp
+        assert "frame-ancestors *" not in csp
+
+
 # --- 4. Reliability & Fault Tolerance Tests ---
 
 def test_mongodb_down_behavior(client):
